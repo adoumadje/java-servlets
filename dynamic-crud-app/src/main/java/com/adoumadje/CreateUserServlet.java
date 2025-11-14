@@ -1,5 +1,7 @@
 package com.adoumadje;
 
+import com.adoumadje.utils.Constants;
+import com.adoumadje.utils.Cryptographer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Base64;
 
 @WebServlet(urlPatterns = "/create-user")
 public class CreateUserServlet extends HttpServlet {
@@ -26,12 +29,10 @@ public class CreateUserServlet extends HttpServlet {
     private Connection connection;
 
     public void init() {
-        String dbUrl = "jdbc:mysql://localhost:3306/servletDb";
-        String dbUser = "servletUser";
-        String dbPass = "password";
         try {
-            this.connection = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-        } catch (SQLException e) {
+            Class.forName(Constants.MYSQL_DRIVER);
+            this.connection = DriverManager.getConnection(Constants.DB_URL, Constants.DB_USER, Constants.DB_PASS);
+        } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -55,17 +56,19 @@ public class CreateUserServlet extends HttpServlet {
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
         String email = req.getParameter("email");
-        String password = req.getParameter("password");
+        String password = Cryptographer.encode(req.getParameter("password"));
 
         String sql = "INSERT INTO users (firstname, lastname, email, password) " +
                 "VALUES (?, ?, ?, ?)";
         try {
+
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, firstName);
             preparedStatement.setString(2, lastName);
             preparedStatement.setString(3, email);
             preparedStatement.setString(4, password);
             preparedStatement.execute();
+            preparedStatement.close();
             resp.sendRedirect(req.getContextPath() + "/list-users");
         } catch (SQLException e) {
             throw new RuntimeException(e);
