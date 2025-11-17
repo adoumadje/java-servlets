@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface ResultSetExtractor<T> {
-    T extract(ResultSet res);
+    T extract(ResultSet res) throws SQLException;
 
     List<T> extractList(ResultSet res) throws SQLException;
 }

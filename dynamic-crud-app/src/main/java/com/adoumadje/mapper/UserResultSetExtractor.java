@@ -2,6 +2,7 @@ package com.adoumadje.mapper;
 
 import com.adoumadje.interfaces.ResultSetExtractor;
 import com.adoumadje.model.User;
+import com.adoumadje.utils.Cryptographer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +12,16 @@ import java.util.List;
 public class UserResultSetExtractor implements ResultSetExtractor<User> {
 
     @Override
-    public User extract(ResultSet res) {
+    public User extract(ResultSet res) throws SQLException {
+        if(res.next()) {
+            User user = new User();
+            user.setId(res.getLong("id"));
+            user.setFirstName(res.getString("firstname"));
+            user.setLastName(res.getString("lastname"));
+            user.setEmail(res.getString("email"));
+            user.setPassword(Cryptographer.decode(res.getString("password")));
+            return user;
+        }
         return null;
     }
 
