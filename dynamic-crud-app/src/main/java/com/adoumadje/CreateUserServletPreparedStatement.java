@@ -4,6 +4,7 @@ import com.adoumadje.utils.Cryptographer;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,12 +20,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Enumeration;
 
-//@WebServlet(urlPatterns = "/create-user")
-public class CreateUserServletContext extends HttpServlet {
+@WebServlet(urlPatterns = "/create-user")
+public class CreateUserServletPreparedStatement extends HttpServlet {
 
     private Connection connection;
+    private PreparedStatement preparedStatement;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -33,11 +34,9 @@ public class CreateUserServletContext extends HttpServlet {
             Class.forName(servletContext.getInitParameter("mysql-driver"));
             this.connection = DriverManager.getConnection(servletContext.getInitParameter("dbUrl"),
                     servletContext.getInitParameter("dbUser"), servletContext.getInitParameter("dbPass"));
-            Enumeration<String> params = servletContext.getInitParameterNames();
-            while (params.hasMoreElements()) {
-                String pn = params.nextElement();
-                System.out.println("{" + pn + ": " + servletContext.getInitParameter(pn) + "}");
-            }
+            String sql = "INSERT INTO users (firstname, lastname, email, password) " +
+                    "VALUES (?, ?, ?, ?)";
+            this.preparedStatement = this.connection.prepareStatement(sql);
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
@@ -64,17 +63,13 @@ public class CreateUserServletContext extends HttpServlet {
         String email = req.getParameter("email");
         String password = Cryptographer.encode(req.getParameter("password"));
 
-        String sql = "INSERT INTO users (firstname, lastname, email, password) " +
-                "VALUES (?, ?, ?, ?)";
-        try {
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, firstName);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setString(3, email);
-            preparedStatement.setString(4, password);
-            preparedStatement.execute();
-            preparedStatement.close();
+        try {
+            this.preparedStatement.setString(1, firstName);
+            this.preparedStatement.setString(2, lastName);
+            this.preparedStatement.setString(3, email);
+            this.preparedStatement.setString(4, password);
+            this.preparedStatement.execute();
             resp.sendRedirect(req.getContextPath() + "/list-users");
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -83,6 +78,7 @@ public class CreateUserServletContext extends HttpServlet {
 
     public void destroy() {
         try {
+            this.preparedStatement.close();
             this.connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
