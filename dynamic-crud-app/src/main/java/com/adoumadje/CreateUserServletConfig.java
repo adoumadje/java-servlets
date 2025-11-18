@@ -1,7 +1,7 @@
 package com.adoumadje;
 
-import com.adoumadje.utils.Constants;
 import com.adoumadje.utils.Cryptographer;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,16 +19,24 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-//@WebServlet(urlPatterns = "/create-user")
-public class CreateUserServlet extends HttpServlet {
+//@WebServlet(urlPatterns = "/create-user",
+//initParams = {
+//        @WebInitParam(name = "mysql-driver", value = "com.mysql.cj.jdbc.Driver"),
+//        @WebInitParam(name = "dbUrl", value = "jdbc:mysql://localhost:3306/servletDb"),
+//        @WebInitParam(name = "dbUser", value = "servletUser"),
+//        @WebInitParam(name = "dbPass", value = "password")
+//})
+public class CreateUserServletConfig extends HttpServlet {
 
     private Connection connection;
 
-    public void init() {
+    @Override
+    public void init(ServletConfig config) throws ServletException {
         try {
-            Class.forName(Constants.MYSQL_DRIVER);
-            this.connection = DriverManager.getConnection(Constants.DB_URL, Constants.DB_USER, Constants.DB_PASS);
-        } catch (SQLException | ClassNotFoundException e) {
+            Class.forName(config.getInitParameter("mysql-driver"));
+            this.connection = DriverManager.getConnection(config.getInitParameter("dbUrl"),
+                    config.getInitParameter("dbUser"), config.getInitParameter("dbPass"));
+        } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
     }

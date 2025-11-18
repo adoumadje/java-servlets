@@ -4,4 +4,30 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+    <servlet-name>CreateUserServlet</servlet-name>
+    <servlet-class>com.adoumadje.CreateUserServletConfigXml</servlet-class>
+    <init-param>
+      <param-name>mysql-driver</param-name>
+      <param-value>com.mysql.cj.jdbc.Driver</param-value>
+    </init-param>
+    <init-param>
+      <param-name>dbUrl</param-name>
+      <param-value>jdbc:mysql://localhost:3306/servletDb</param-value>
+    </init-param>
+    <init-param>
+      <param-name>dbUser</param-name>
+      <param-value>servletUser</param-value>
+    </init-param>
+    <init-param>
+      <param-name>dbPass</param-name>
+      <param-value>password</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>CreateUserServlet</servlet-name>
+    <url-pattern>/create-user</url-pattern>
+  </servlet-mapping>
 </web-app>
