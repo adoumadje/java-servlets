@@ -10,6 +10,6 @@
     int num2 = Integer.valueOf(request.getParameter("num2"));
     int average = (num1 + num2) / 2;
   %>
-  <h2><%= num1 + " + " + num2 + " = " + average %></h2>
+  <h2><%= String.format("average(%d, %d) = %d", num1, num2, average) %></h2>
 </body>
 </html>
